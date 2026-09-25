@@ -1,0 +1,5 @@
+[mysqld]
+bind-address=127.0.0.1
+innodb_buffer_pool_size=64M
+max_connections=20
+performance_schema=OFF

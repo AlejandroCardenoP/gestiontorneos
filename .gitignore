@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Archivos locales y credenciales
+.gradle/
+build/
+bin/
+*.tar.gz
+*.rar
+.env
+*.env
+*.pem
+*.key
