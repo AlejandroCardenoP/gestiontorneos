@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class GestiontorneosApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(GestiontorneosApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(GestiontorneosApplication.class, args);
+  }
 }

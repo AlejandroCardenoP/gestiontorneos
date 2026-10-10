@@ -1,9 +1,18 @@
 spring:
   application:
     name: gestiontorneos
-  profiles:
-      active: dev  
-
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/gestiontorneos}
+    username: ${SPRING_DATASOURCE_USERNAME:torneos_app}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
 server:
-    servlet:
-        context-path: /apiinicial
+  port: ${SERVER_PORT:9090}
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  servlet:
+    context-path: /apiinicial
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
