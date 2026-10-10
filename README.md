@@ -1,83 +1,98 @@
-# Gestion de torneos
+# Gestión de torneos — segunda entrega
 
-API REST de deportes con Java 25, Spring Boot, Gradle y MySQL/MariaDB.
+API REST Java 25 / Spring Boot 4.1.1 / Gradle 9.7.1. Persistencia con
+JdbcTemplate, consultas SQL parametrizadas y MariaDB/MySQL. Sin JPA.
 
-## Proyecto utilizado
+## Casos de negocio
 
-La aplicacion desplegada en EC2 se compila desde gestiontorneos-main/.
-El proyecto de la raiz se conserva como version anterior.
+1. Crear un deporte y establecer límites de jugadores.
+2. Registrar equipos válidos para ese deporte.
+3. Crear un torneo con deporte, fecha y capacidad de 2 a 128 equipos.
+4. Inscribir equipos: mismo deporte, sin duplicados, con cupo y estado INSCRIPCION.
+5. Cancelar una inscripción antes de iniciar.
+6. Iniciar el torneo con al menos dos equipos: pasa a EN_CURSO.
+7. Finalizarlo: pasa a FINALIZADO; no admite nuevas inscripciones ni cancelaciones.
 
-## Contenido
+Finalizar aquí registra el cierre administrativo. Calendario, partidos,
+marcadores, clasificación y ganadores quedan fuera de esta entrega.
 
-- gestiontorneos-main/src/: codigo de la API con persistencia JDBC.
-- database/gestiontorneos.sql: estructura y datos exportados de AWS.
-- deploy/: configuraciones de systemd, Nginx y MariaDB.
-- deploy/app.env.example: ejemplo de variables sin credenciales reales.
+## Una compilación canónica
 
-## Base de datos
+El código activo está en `gestiontorneos-main/src`. El build de la raíz delega
+en ese subproyecto. `src/` de la raíz se conserva como legado de la primera
+entrega y **no se compila**. Así ejecutar Gradle desde la raíz o desde la
+carpeta interna produce la misma aplicación.
 
-Importar en una instancia de pruebas vacia:
-```bash
-sudo mariadb < database/gestiontorneos.sql
+```powershell
+.\gradlew.bat test bootJar
 ```
 
-El archivo puede reemplazar tablas existentes. Respaldar antes de importarlo.
-Crear un usuario de aplicacion con permisos SELECT, INSERT, UPDATE y DELETE
-sobre gestiontorneos.*. Configurar sus credenciales mediante variables
-SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME y
-SPRING_DATASOURCE_PASSWORD.
+En Linux: `bash ./gradlew test bootJar`.
+Las pruebas usan una base H2 aislada con SQL en modo MySQL, nunca la base AWS.
+H2 no reemplaza la verificación final de bloqueos e intercalaciones en MariaDB.
 
-## Compilacion
+## Preparación de una base nueva
 
-Desde la raiz del repositorio:
-```bash
-bash ./gradlew -p gestiontorneos-main bootJar --no-daemon --max-workers=1
-```
+Crear una base `gestiontorneos` con UTF-8 en MariaDB/MySQL. Ejecutar allí:
+`database/migrations/V2__torneos_equipos_inscripciones.sql`.
+La migración crea las cuatro tablas y no carga registros de ejemplo.
+Para conservar deportes existentes, ejecutar esa misma migración sobre la
+base actual; no importar el dump antiguo como migración.
 
-## Ejecucion
+`database/gestiontorneos.sql` es el respaldo de la primera entrega y contiene
+DROP TABLE y datos históricos. No ejecutarlo sobre una instalación actualizada.
 
-Con las variables de conexion configuradas:
-```bash
+Crear un usuario de aplicación con permisos SELECT, INSERT, UPDATE, DELETE
+sobre gestiontorneos.*. El usuario de migración requiere CREATE y REFERENCES.
+La aplicación no crea ni modifica tablas automáticamente.
+
+## Ejecutar localmente (PowerShell)
+
+```powershell
+$env:SPRING_DATASOURCE_URL='jdbc:mysql://127.0.0.1:3306/gestiontorneos'
+$env:SPRING_DATASOURCE_USERNAME='torneos_app'
+$clave=Read-Host 'Clave de la base' -AsSecureString
+$env:SPRING_DATASOURCE_PASSWORD=[System.Net.NetworkCredential]::new('', $clave).Password
 java -jar gestiontorneos-main/build/libs/gestiontorneos-0.0.1-SNAPSHOT.jar
 ```
 
-## Despliegue EC2
+No publicar contraseñas en Git ni en capturas. Usar `deploy/app.env.example`
+solo como plantilla; Spring Boot no lee automáticamente archivos `.env`.
+El servicio de systemd carga `/etc/gestiontorneos/app.env`.
 
-El servicio usa /opt/gestiontorneos/app.jar y carga las variables desde
-/etc/gestiontorneos/app.env, protegido con permisos 600.
+## Swagger / OpenAPI
 
-Las configuraciones de deploy/ corresponden a Amazon Linux 2023:
-- gestiontorneos.service: /etc/systemd/system/
-- nginx-gestiontorneos.conf: /etc/nginx/default.d/
-- mariadb-gestiontorneos.cnf: /etc/my.cnf.d/
+- Local: http://127.0.0.1:9090/apiinicial/swagger-ui.html
+- OpenAPI JSON: http://127.0.0.1:9090/apiinicial/v3/api-docs
+- AWS vía Nginx: `http://IP_ACTUAL/apiinicial/swagger-ui.html`
 
-Adaptar las rutas y el usuario del servicio en otros equipos.
-Crear app.env a partir del ejemplo y reemplazar la clave en el servidor.
-Nunca subir el archivo con credenciales reales.
+Swagger permite consultar contratos y ejecutar operaciones reales sobre la
+base configurada. La demo no tiene autenticación: limitar acceso de red a
+evaluadores y equipo. No abrir 3306 o 9090 a Internet.
 
-Nginx recibe solicitudes en el puerto 80 y las envia a 127.0.0.1:9090.
-MariaDB escucha solamente en 127.0.0.1.
-La API no incorpora autenticacion; restringir el acceso de red para la demo.
+## Rutas (prefijo /apiinicial)
 
-## Operaciones
+| Recurso | Rutas y métodos |
+|---|---|
+| Deportes | GET/POST /deportes; GET/PUT/DELETE /deportes/{id} |
+| Equipos | GET/POST /equipos; GET/PUT/DELETE /equipos/{id} |
+| Torneos | GET/POST /torneos; GET/PUT/DELETE /torneos/{id} |
+| Inscripciones | GET/POST /torneos/{torneoId}/inscripciones |
+| Cancelación | DELETE /torneos/{torneoId}/inscripciones/{equipoId} |
+| Inicio | POST /torneos/{id}/inicio |
+| Finalización | POST /torneos/{id}/finalizacion |
 
-- GET /apiinicial/deportes
-- GET /apiinicial/deportes/{id}
-- POST /apiinicial/deportes
-- PUT /apiinicial/deportes/{id}
-- DELETE /apiinicial/deportes/{id}
+POST de creación: 201; consultas/cambios: 200; borrado: 204.
+400: entrada inválida; 404: recurso inexistente; 409: conflicto de negocio o
+integridad. Los errores usan ProblemDetail y no muestran consultas SQL.
 
-Ejemplo de cuerpo JSON para POST y PUT:
-```json
-{"nombre":"Tenis prueba","minJugadores":1,"maxJugadores":2}
-```
+## Documentación complementaria
 
-El ID se genera automaticamente al crear un registro.
-Los cambios se guardan en la base de AWS; no se sincronizan con el PC.
+- [Arquitectura y SOLID](docs/arquitectura-solid.md)
+- [Flujo de ramas](docs/gitflow.md)
+- [Actualizar EC2 y verificar](docs/despliegue-etapa2.md)
+- [Casos de aceptación](docs/aceptacion-etapa2.md)
+- [Colección Postman](docs/torneos-etapa2.postman_collection.json)
 
-## Validacion
-
-Compilacion y consulta GET comprobadas en EC2.
-Creacion POST comprobada desde Postman.
-Actualizacion PUT confirmada por el usuario.
-Eliminacion DELETE pendiente de confirmar.
+Importar la colección y definir `baseUrl`. Ejecutar en orden para capturar
+IDs; el prefijo de demo único evita colisiones. No borrar datos previos.
