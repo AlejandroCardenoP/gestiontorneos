@@ -239,6 +239,11 @@ class ApiBusinessIntegrationTest {
 
   @Test
   void documentacionYErroresDeFormato() throws Exception {
+    var pagina = request("GET", "/", null);
+    assertEquals(200, pagina.statusCode());
+    assertTrue(pagina.body().contains("CANCHA"));
+    assertEquals(200, request("GET", "/app.js", null).statusCode());
+    assertEquals(200, request("GET", "/styles.css", null).statusCode());
     var spec = expect(200, "GET", "/v3/api-docs", null);
     assertTrue(spec.get("paths").has("/deportes"));
     assertTrue(spec.get("paths").has("/equipos"));
