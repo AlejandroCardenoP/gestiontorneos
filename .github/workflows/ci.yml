@@ -1,0 +1,26 @@
+name: Java y pruebas de API
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: ["feature/**", dev, "release/**", "hotfix/**"]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Probar y compilar
+        run: bash ./gradlew test bootJar --no-daemon --max-workers=2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pruebas-y-ejecutable
+          path: |
+            gestiontorneos-main/build/reports/tests/
+            gestiontorneos-main/build/libs/*.jar

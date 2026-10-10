@@ -1,0 +1,17 @@
+[Unit]
+Description=API Gestion de Torneos
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+User=ec2-user
+WorkingDirectory=/opt/gestiontorneos
+EnvironmentFile=/etc/gestiontorneos/app.env
+ExecStart=/usr/bin/java -Xms64m -Xmx256m -XX:MaxMetaspaceSize=192m -jar /opt/gestiontorneos/app.jar
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
