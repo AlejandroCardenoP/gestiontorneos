@@ -30,3 +30,11 @@ CREATE TABLE IF NOT EXISTS inscripcion (
     CONSTRAINT fk_inscripcion_torneo FOREIGN KEY (torneo_id) REFERENCES torneo(id),
     CONSTRAINT fk_inscripcion_equipo FOREIGN KEY (equipo_id) REFERENCES equipo(id)
 );
+
+-- Aplicar despues de V2. No elimina datos. Respalde antes de ejecutar.
+CREATE TABLE IF NOT EXISTS comprobante_inscripcion (
+ id BIGINT AUTO_INCREMENT PRIMARY KEY,
+ inscripcion_id BIGINT NOT NULL UNIQUE,
+ codigo VARCHAR(36) NOT NULL UNIQUE,
+ CONSTRAINT fk_comprobante_inscripcion FOREIGN KEY (inscripcion_id) REFERENCES inscripcion(id)
+);

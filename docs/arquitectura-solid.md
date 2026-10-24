@@ -4,12 +4,14 @@
 
 ```mermaid
 flowchart LR
-    HTTP[Postman / Swagger] --> API[api: Controllers y validación HTTP]
+    HTTP[Postman / Swagger] --> API[api: Controllers y validaciÃ³n HTTP]
     API --> S[service: interfaces de casos de uso]
     S --> I[service.impl: reglas y transacciones]
     I --> R[repository: interfaces de persistencia]
     R --> J[repository.jdbc: SQL parametrizado]
-    J --> DB[(MariaDB / MySQL)]
+    R --> P[repository.jpa: EntityManager y entidades]
+    P --> DB[(MariaDB / MySQL)]
+    J --> DB
 ```
 
 `domain` contiene records inmutables, estados y excepciones sin dependencia
@@ -19,39 +21,39 @@ Los servicios reciben interfaces de repositorio por constructor.
 
 ## SOLID aplicado
 
-- **S — responsabilidad única:** controladores traducen HTTP; servicios toman
-  decisiones de negocio; repositorios ejecutan SQL; el advice traduce errores.
-- **O — abierto/cerrado:** una nueva implementación de EquipoRepository puede
+- **S â€” responsabilidad Ãºnica:** controladores traducen HTTP; servicios toman
+  decisiones de negocio; repositorios administran persistencia SQL/JPA; el advice traduce errores.
+- **O â€” abierto/cerrado:** una nueva implementaciÃ³n de EquipoRepository puede
   sustituir JDBC sin modificar los consumidores de la interfaz.
-- **L — sustitución:** implementaciones respetan los contratos: Optional vacío
-  si un ID no existe, lista vacía si no hay filas, ID generado al crear.
-  `bloquear` requiere una transacción activa y conserva semántica de consulta.
-- **I — segregación:** cuatro contratos de servicio y cuatro de repositorio,
-  específicos de recursos; no existe una interfaz universal con métodos vacíos.
-- **D — inversión:** capas superiores dependen de interfaces y reciben sus
-  dependencias por constructor. Spring configura la implementación concreta.
+- **L â€” sustituciÃ³n:** implementaciones respetan los contratos: Optional vacÃ­o
+  si un ID no existe, lista vacÃ­a si no hay filas, ID generado al crear.
+  `bloquear` requiere una transacciÃ³n activa y conserva semÃ¡ntica de consulta.
+- **I â€” segregaciÃ³n:** cuatro contratos de servicio y cuatro de repositorio,
+  especÃ­ficos de recursos; no existe una interfaz universal con mÃ©todos vacÃ­os.
+- **D â€” inversiÃ³n:** capas superiores dependen de interfaces y reciben sus
+  dependencias por constructor. Spring configura la implementaciÃ³n concreta.
 
 SOLID no significa crear una interfaz para cada clase. JdbcInsert es un
-detalle interno compartido para generar claves y no requiere un contrato público.
+detalle interno compartido para generar claves y no requiere un contrato pÃºblico.
 
 ## Clean Code
 
-Paquetes en minúsculas, nombres de negocio, DTOs separados de respuestas,
-records inmutables, validación de entrada, estados enumerados, errores comunes
-y constructor injection. Se elimina field injection en el código activo.
+Paquetes en minÃºsculas, nombres de negocio, DTOs separados de respuestas,
+records inmutables, validaciÃ³n de entrada, estados enumerados, errores comunes
+y constructor injection. Se elimina field injection en el cÃ³digo activo.
 Se conserva el JSON original de deportes para compatibilidad con Postman.
-Las consultas usan parámetros; no interpolan valores del usuario en SQL.
+Las consultas usan parÃ¡metros; no interpolan valores del usuario en SQL.
 
 ## Integridad y concurrencia
 
 FKs impiden borrar deportes con equipos/torneos o entidades con inscripciones.
-UNIQUE impide repetir una inscripción incluso bajo concurrencia.
-La inscripción bloquea primero la fila del torneo con SELECT FOR UPDATE:
-validación de cupos e inserción ocurren en la misma transacción.
+UNIQUE impide repetir una inscripciÃ³n incluso bajo concurrencia.
+La inscripciÃ³n bloquea primero la fila del torneo con SELECT FOR UPDATE:
+validaciÃ³n de cupos e inserciÃ³n ocurren en la misma transacciÃ³n.
 Iniciar/finalizar y cancelar usan el mismo bloqueo; no pueden saltarse el cierre.
-Después se bloquea el equipo para impedir que cambie de deporte mientras se inscribe.
+DespuÃ©s se bloquea el equipo para impedir que cambie de deporte mientras se inscribe.
 No se editan equipos inscritos. Cambiar el rango de un deporte no puede
 invalidar equipos existentes. No se reduce el cupo por debajo de los inscritos.
 
 La fecha de inicio es informativa/planificada: el inicio se realiza mediante
-el caso de uso explícito, no por un proceso automático.
+el caso de uso explÃ­cito, no por un proceso automÃ¡tico.
