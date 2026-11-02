@@ -4,6 +4,8 @@ import edu.itm.gestiontorneos.domain.*;
 import java.util.List;
 
 public interface InscripcionRepository {
+  java.util.Optional<Comprobante> comprobante(Long torneoId, Long equipoId);
+
   List<Inscripcion> listar(Long torneoId);
 
   long contar(Long torneoId);

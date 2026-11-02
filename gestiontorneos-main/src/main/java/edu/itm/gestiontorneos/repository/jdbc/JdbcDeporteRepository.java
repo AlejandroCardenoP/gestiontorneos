@@ -64,7 +64,7 @@ public class JdbcDeporteRepository implements DeporteRepository {
 
   public boolean existenEquiposFueraDeRango(Long id, int minimo, int maximo) {
     return jdbc.queryForObject(
-            "SELECT COUNT(*) FROM equipo WHERE deporte_id=? AND (cantidad_jugadores<? OR"
+            "SELECT COUNT(id) FROM equipo WHERE deporte_id=? AND (cantidad_jugadores<? OR"
                 + " cantidad_jugadores>?)",
             Long.class,
             id,

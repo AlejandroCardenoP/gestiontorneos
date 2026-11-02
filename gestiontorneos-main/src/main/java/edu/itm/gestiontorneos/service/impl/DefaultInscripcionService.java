@@ -22,6 +22,13 @@ public class DefaultInscripcionService implements InscripcionService {
     this.inscripciones = inscripciones;
   }
 
+  public Comprobante obtenerComprobante(Long torneoId, Long equipoId) {
+    torneos.buscar(torneoId).orElseThrow(() -> new NoEncontradoException("Torneo", torneoId));
+    return inscripciones
+        .comprobante(torneoId, equipoId)
+        .orElseThrow(() -> new NoEncontradoException("Comprobante del equipo", equipoId));
+  }
+
   public List<Inscripcion> listar(Long id) {
     torneos.buscar(id).orElseThrow(() -> new NoEncontradoException("Torneo", id));
     return inscripciones.listar(id);

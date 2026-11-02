@@ -16,11 +16,12 @@ jobs:
           distribution: temurin
           java-version: '25'
       - name: Probar y compilar
-        run: bash ./gradlew test bootJar --no-daemon --max-workers=2
+        run: bash ./gradlew test :gestiontorneos-main:unitTestReport :gestiontorneos-main:jacocoTestCoverageVerification bootJar --no-daemon --max-workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: pruebas-y-ejecutable
           path: |
             gestiontorneos-main/build/reports/tests/
+            gestiontorneos-main/build/reports/jacoco/
             gestiontorneos-main/build/libs/*.jar

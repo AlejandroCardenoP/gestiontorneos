@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cancha · Gestión de torneos</title><link rel="stylesheet" href="./styles.css"><script defer src="./app.js"></script></head>
+<body>
+<aside><a class="brand" href="./"><span>◈</span> CANCHA<small>GESTIÓN DE TORNEOS</small></a><nav aria-label="Navegación principal"><button data-view="resumen" class="selected">◫ &nbsp; Resumen</button><button data-view="torneos">◇ &nbsp; Torneos</button><button data-view="equipos">♧ &nbsp; Equipos</button><button data-view="deportes">◎ &nbsp; Deportes</button></nav><div class="aside-bottom">Cada equipo cuenta.<br><strong>Que empiece el juego.</strong></div></aside>
+<main><header><span>Tu espacio de competición</span><button id="refresh" class="secondary">↻ Actualizar</button></header><div id="notice" role="status" aria-live="polite"></div><section id="content" aria-label="Contenido" aria-busy="true"><p>Cargando tus datos…</p></section><footer>CANCHA <span>Organiza. Conecta. Compite.</span></footer></main>
+<dialog id="editor"><form id="form"><div class="dialog-head"><h2 id="form-title"></h2><button type="button" id="close" class="secondary" aria-label="Cerrar formulario">✕</button></div><div id="fields"></div><p id="form-error" role="alert"></p><div class="form-actions"><button type="button" id="cancel" class="secondary">Cancelar</button><button id="save" type="submit">Guardar</button></div></form></dialog>
+</body></html>
