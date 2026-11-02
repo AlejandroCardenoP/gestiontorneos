@@ -63,7 +63,8 @@ public class JdbcEquipoRepository implements EquipoRepository {
   }
 
   public boolean tieneInscripciones(Long id) {
-    return jdbc.queryForObject("SELECT COUNT(*) FROM inscripcion WHERE equipo_id=?", Long.class, id)
+    return jdbc.queryForObject(
+            "SELECT COUNT(id) FROM inscripcion WHERE equipo_id=?", Long.class, id)
         > 0;
   }
 }

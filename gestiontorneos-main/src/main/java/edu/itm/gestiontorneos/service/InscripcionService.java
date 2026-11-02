@@ -4,6 +4,8 @@ import edu.itm.gestiontorneos.domain.Inscripcion;
 import java.util.List;
 
 public interface InscripcionService {
+  edu.itm.gestiontorneos.domain.Comprobante obtenerComprobante(Long torneoId, Long equipoId);
+
   List<Inscripcion> listar(Long torneoId);
 
   Inscripcion inscribir(Long torneoId, Long equipoId);

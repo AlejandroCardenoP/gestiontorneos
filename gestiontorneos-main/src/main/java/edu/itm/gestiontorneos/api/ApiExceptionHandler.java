@@ -10,6 +10,30 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+  private static final org.slf4j.Logger LOG =
+      org.slf4j.LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+  @ExceptionHandler(org.springframework.dao.CannotAcquireLockException.class)
+  public ProblemDetail bloqueo(Exception e) {
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.CONFLICT, "Operacion concurrente; vuelva a intentarlo");
+  }
+
+  @ExceptionHandler(org.springframework.dao.DataAccessResourceFailureException.class)
+  public ProblemDetail noDisponible(Exception e) {
+    LOG.error("Fallo de acceso a base de datos", e);
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.SERVICE_UNAVAILABLE, "La base de datos no esta disponible temporalmente");
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ProblemDetail inesperado(Exception e) {
+    if (e instanceof org.springframework.web.ErrorResponse response) return response.getBody();
+    LOG.error("Error no controlado", e);
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrio un error interno; contacte al administrador");
+  }
+
   @ExceptionHandler(NoEncontradoException.class)
   public ProblemDetail noEncontrado(NoEncontradoException e) {
     return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());

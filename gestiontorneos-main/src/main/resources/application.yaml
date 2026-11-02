@@ -1,6 +1,10 @@
 spring:
   application:
     name: gestiontorneos
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/gestiontorneos}
     username: ${SPRING_DATASOURCE_USERNAME:torneos_app}

@@ -24,7 +24,8 @@ class ApiBusinessIntegrationTest {
 
   @BeforeEach
   void limpiarSoloBaseDePruebas() {
-    for (String tabla : new String[] {"inscripcion", "torneo", "equipo", "deporte"})
+    for (String tabla :
+        new String[] {"comprobante_inscripcion", "inscripcion", "torneo", "equipo", "deporte"})
       jdbc.update("DELETE FROM " + tabla);
   }
 
@@ -113,7 +114,7 @@ class ApiBusinessIntegrationTest {
         "{\"nombre\":\"Futbol\",\"minJugadores\":12,\"maxJugadores\":10}");
     expect(204, "DELETE", "/deportes/" + id, null);
     expect(404, "GET", "/deportes/" + id, null);
-    assertEquals(0, jdbc.queryForObject("SELECT COUNT(*) FROM deporte", Integer.class));
+    assertEquals(0, jdbc.queryForObject("SELECT COUNT(id) FROM deporte", Integer.class));
   }
 
   @Test
@@ -124,6 +125,8 @@ class ApiBusinessIntegrationTest {
     expect(409, "POST", "/torneos/" + t + "/inicio", null);
     expect(409, "POST", inscripciones(t), inscribir(wrong));
     expect(201, "POST", inscripciones(t), inscribir(a));
+    var comprobante = expect(200, "GET", inscripciones(t) + "/" + a + "/comprobante", null);
+    assertFalse(comprobante.get("codigo").asText().isBlank());
     expect(409, "POST", inscripciones(t), inscribir(a));
     expect(201, "POST", inscripciones(t), inscribir(b));
     expect(409, "POST", inscripciones(t), inscribir(c));
@@ -234,7 +237,7 @@ class ApiBusinessIntegrationTest {
     assertEquals(
         2,
         jdbc.queryForObject(
-            "SELECT COUNT(*) FROM inscripcion WHERE torneo_id=?", Integer.class, t));
+            "SELECT COUNT(id) FROM inscripcion WHERE torneo_id=?", Integer.class, t));
   }
 
   @Test
@@ -248,6 +251,15 @@ class ApiBusinessIntegrationTest {
     assertTrue(spec.get("paths").has("/deportes"));
     assertTrue(spec.get("paths").has("/equipos"));
     assertTrue(spec.get("paths").has("/torneos/{torneoId}/inscripciones"));
+    assertTrue(spec.get("paths").has("/torneos/{torneoId}/inscripciones/{equipoId}/comprobante"));
+    for (var path : spec.get("paths"))
+      for (var operation : path) {
+        if (operation.has("responses")) {
+          assertTrue(operation.get("responses").has("400"));
+          assertTrue(operation.get("responses").has("409"));
+          assertTrue(operation.get("responses").has("500"));
+        }
+      }
     assertEquals(200, request("GET", "/swagger-ui/index.html", null).statusCode());
     expect(400, "GET", "/deportes/abc", null);
     expect(400, "POST", "/deportes", "{mal-json}");

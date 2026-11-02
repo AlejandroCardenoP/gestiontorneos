@@ -13,8 +13,17 @@ final class JdbcInsert {
     jdbc.update(
         conexion -> {
           var sentencia = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-          for (int i = 0; i < parametros.length; i++) sentencia.setObject(i + 1, parametros[i]);
-          return sentencia;
+          try {
+            for (int i = 0; i < parametros.length; i++) sentencia.setObject(i + 1, parametros[i]);
+            return sentencia; // JdbcTemplate owns and closes the returned statement.
+          } catch (java.sql.SQLException | RuntimeException error) {
+            try {
+              sentencia.close();
+            } catch (java.sql.SQLException closeError) {
+              error.addSuppressed(closeError);
+            }
+            throw error;
+          }
         },
         clave);
     return Objects.requireNonNull(clave.getKey(), "La base no genero un ID").longValue();

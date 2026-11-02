@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+    id 'jacoco'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -21,7 +22,8 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testRuntimeOnly 'com.h2database:h2'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jdbc-test'
@@ -37,4 +39,45 @@ tasks.named('test') {
 		def mockitoAgent = configurations.testRuntimeClasspath.find { it.name.startsWith('mockito-core-') }
 		jvmArgs "-javaagent:${mockitoAgent.absolutePath}"
 	}
+}
+
+jacoco { toolVersion = '0.8.14' }
+test { finalizedBy jacocoTestReport }
+jacocoTestReport {
+    dependsOn test
+    reports { xml.required = true; html.required = true }
+}
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            element = 'CLASS'
+            includes = ['edu.itm.gestiontorneos.service.impl.*']
+            limit { counter = 'METHOD'; value = 'COVEREDRATIO'; minimum = 1.0 }
+        }
+    }
+}
+check.dependsOn jacocoTestCoverageVerification
+
+tasks.register('unitTest', Test) {
+    description = 'Pruebas aisladas de todos los servicios con Mockito, sin Spring ni BD'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    include '**/service/*Test.class'
+    useJUnitPlatform()
+    maxHeapSize = '384m'
+    doFirst {
+        def mockitoAgent = configurations.testRuntimeClasspath.find { it.name.startsWith('mockito-core-') }
+        jvmArgs "-javaagent:${mockitoAgent.absolutePath}"
+    }
+}
+tasks.register('unitTestReport', JacocoReport) {
+    dependsOn unitTest
+    executionData unitTest
+    sourceSets sourceSets.main
+    reports { xml.required = true; html.required = true }
+}
+jacocoTestCoverageVerification {
+    dependsOn unitTest
+    executionData.setFrom(layout.buildDirectory.file('jacoco/unitTest.exec'))
 }
