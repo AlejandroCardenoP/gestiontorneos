@@ -3,6 +3,13 @@
 API REST Java 25 / Spring Boot 4.1.1 / Gradle 9.7.1. Persistencia con
 DAO mixto: JdbcTemplate con SQL para deportes/equipos y JPA para torneos/inscripciones. Base MariaDB/MySQL.
 
+## Frontend separado (última entrega)
+
+Este repositorio contiene el backend. La interfaz CANCHA se trasladó al proyecto
+independiente `gestiontorneos-frontend`, previsto para la cuenta AlejandroCardenoP.
+El JAR ya no incluye HTML, CSS ni JavaScript de la aplicación; Swagger sigue disponible.
+Consultar `docs/frontend-separado.md` para ejecutar y desplegar ambos proyectos.
+
 ## Casos de negocio
 
 1. Crear un deporte y establecer lÃ­mites de jugadores.
