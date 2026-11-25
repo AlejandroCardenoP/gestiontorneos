@@ -6,7 +6,7 @@ DAO mixto: JdbcTemplate con SQL para deportes/equipos y JPA para torneos/inscrip
 ## Frontend separado (última entrega)
 
 Este repositorio contiene el backend. La interfaz CANCHA se trasladó al proyecto
-independiente `gestiontorneos-frontend`, previsto para la cuenta AlejandroCardenoP.
+independiente [frontend](https://github.com/Brayanaristi/frontend).
 El JAR ya no incluye HTML, CSS ni JavaScript de la aplicación; Swagger sigue disponible.
 Consultar `docs/frontend-separado.md` para ejecutar y desplegar ambos proyectos.
 

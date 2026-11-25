@@ -9,8 +9,7 @@
 
 Backend publicado: https://github.com/AlejandroCardenoP/gestiontorneos
 
-Frontend preparado para publicar como `AlejandroCardenoP/gestiontorneos-frontend`.
-Confirmar su creación y subida antes de entregar el segundo enlace.
+Repositorio del frontend: https://github.com/Brayanaristi/frontend
 
 ## Desarrollo local
 
